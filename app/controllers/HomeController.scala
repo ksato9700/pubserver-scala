@@ -23,8 +23,7 @@ class HomeController @Inject() (val controllerComponents: ControllerComponents)
     Ok(views.html.index())
   }
 
-  def hello() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.hello())
-  // Ok(views.html.hello())
+  def hello(name: String) = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.hello(name))
   }
 }
