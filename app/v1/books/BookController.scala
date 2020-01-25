@@ -17,17 +17,20 @@ class BookController @Inject() (cc: BookControllerComponents)(
 
   def index: Action[AnyContent] = BookAction.async { implicit request =>
     logger.trace("index: ")
-    postResourceHandler.find.map { posts =>
-      Ok(Json.toJson(posts))
+    bookResourceHandler.find.map { books =>
+      Ok(Json.toJson(books))
     }
   }
 
   def show(id: String): Action[AnyContent] = BookAction.async {
     implicit request =>
       logger.trace(s"show: id = $id")
-      postResourceHandler.lookup(id).map { post =>
-        Ok(Json.toJson(post))
-      }
+      bookResourceHandler
+        .lookup(id)
+        .map { book =>
+          Ok(Json.toJson(book))
+        }
+        .fallbackTo(Future { Ok("{}") })
   }
 
 }

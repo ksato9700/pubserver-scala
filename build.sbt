@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
   "net.logstash.logback" % "logstash-logback-encoder" % "6.3",
   "io.lemonlabs" %% "scala-uri" % "1.5.1",
+  "org.mongodb.scala" %% "mongo-scala-driver" % "2.6.0",
   "net.codingwell" %% "scala-guice" % "4.2.6"
 )
 

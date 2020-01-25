@@ -1,5 +1,5 @@
 package v1.books
-
+import scala.util.Properties
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.ActorSystem
@@ -7,6 +7,10 @@ import play.api.libs.concurrent.CustomExecutionContext
 import play.api.{Logger, MarkerContext}
 
 import scala.concurrent.Future
+
+import org.mongodb.scala._
+import org.mongodb.scala.bson._
+import scala.util.{Success, Failure}
 
 final case class BookData(id: BookId, title: String, body: String)
 
@@ -38,30 +42,53 @@ class BookRepositoryImpl @Inject() ()(implicit ec: BookExecutionContext)
 
   private val logger = Logger(this.getClass)
 
-  private val bookList = List(
-    BookData(BookId("1"), "title 1", "book content 1"),
-    BookData(BookId("2"), "title 2", "book content 2"),
-    BookData(BookId("3"), "title 3", "book content 3"),
-    BookData(BookId("4"), "title 4", "book content 4"),
-    BookData(BookId("5"), "title 5", "book content 5")
-  )
+  private val db: MongoDatabase = {
+    val mongodb_credential =
+      Properties.envOrElse("AOZORA_MONGODB_CREDENTIAL", "")
+    val mongodb_host = Properties.envOrElse("AOZORA_MONGODB_HOST", "localhost")
+    val mongodb_port = Properties.envOrElse("AOZORA_MONGODB_PORT", "27017")
+    logger.info(s"host: ${mongodb_host}")
+
+    //   val uri: String =
+    //     s"mongodb://${mongodb_credential}@${mongodb_host}:${mongodb_port}/aozora?retryWrites=true&w=majority"
+    //   System.setProperty("org.mongodb.async.type", "netty")
+    // val client: MongoClient = MongoClient(uri)
+    val client: MongoClient = MongoClient()
+    val db: MongoDatabase = client.getDatabase("aozora")
+    // println(db.getCollection("books").find().first())
+    db
+
+  }
+
+  private def bookList = {
+    db.getCollection("books")
+      .find
+      .map((d: Document) => {
+        // d.toJson
+        BookData(
+          BookId(d.getOrElse("book_id", "000").asInt32.getValue.toString),
+          d.getOrElse("title", "(no-title)").asString.getValue.toString,
+          d.getOrElse("text_url", "(no-content)").asString.getValue.toString
+        )
+      })
+  }
 
   override def list()(
       implicit mc: MarkerContext
   ): Future[Iterable[BookData]] = {
-    Future {
-      logger.trace(s"list: ")
-      bookList
-    }
+    bookList.toFuture
   }
 
   override def get(
       id: BookId
   )(implicit mc: MarkerContext): Future[Option[BookData]] = {
-    Future {
-      logger.trace(s"get: id = $id")
-      bookList.find(book => book.id == id)
-    }
+    logger.info(s"id: ${id}")
+
+    bookList
+      .filter(book => book.id == id)
+      .head
+      .map(book => Some(book))
+      .fallbackTo(Future { None })
   }
 
   def create(data: BookData)(implicit mc: MarkerContext): Future[BookId] = {

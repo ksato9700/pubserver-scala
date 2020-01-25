@@ -23,8 +23,9 @@ class BookResourceHandler @Inject() (
   )(implicit mc: MarkerContext): Future[Option[BookResource]] = {
     val booksFuture = booksRepository.get(BookId(id))
     booksFuture.map { maybeBookData =>
-      maybeBookData.map { booksData =>
-        createBookResource(booksData)
+      maybeBookData match {
+        case Some(book) => Some(createBookResource(book))
+        case None       => None
       }
     }
   }

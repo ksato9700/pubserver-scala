@@ -79,8 +79,8 @@ class BookActionBuilder @Inject() (
 }
 
 case class BookControllerComponents @Inject() (
-    postActionBuilder: BookActionBuilder,
-    postResourceHandler: BookResourceHandler,
+    bookActionBuilder: BookActionBuilder,
+    bookResourceHandler: BookResourceHandler,
     actionBuilder: DefaultActionBuilder,
     parsers: PlayBodyParsers,
     messagesApi: MessagesApi,
@@ -94,7 +94,7 @@ class BookBaseController @Inject() (pcc: BookControllerComponents)
     with RequestMarkerContext {
   override protected def controllerComponents: ControllerComponents = pcc
 
-  def BookAction: BookActionBuilder = pcc.postActionBuilder
+  def BookAction: BookActionBuilder = pcc.bookActionBuilder
 
-  def postResourceHandler: BookResourceHandler = pcc.postResourceHandler
+  def bookResourceHandler: BookResourceHandler = pcc.bookResourceHandler
 }
