@@ -94,7 +94,7 @@ class BookRepositoryImpl @Inject() ()(implicit ec: BookExecutionContext)
       id: BookId
   )(implicit mc: MarkerContext): Future[Option[BookData]] = {
 
-    bookList(Some(equal("book_id", id))).head
+    bookList(Some(equal("book_id", id.underlying))).head
       .map(book => Some(book))
       .fallbackTo(Future { None })
   }
