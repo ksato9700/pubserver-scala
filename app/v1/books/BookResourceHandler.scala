@@ -1,13 +1,18 @@
 package v1.books
 
 import javax.inject.{Inject, Provider}
-
+import java.time.LocalDateTime
 import play.api.MarkerContext
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 
-case class BookResource(id: String, link: String, title: String, body: String)
+case class BookResource(
+    id: String,
+    link: String,
+    title: String,
+    release_date: LocalDateTime
+)
 
 object BookResource {
   implicit val format: Format[BookResource] = Json.format
@@ -36,8 +41,13 @@ class BookResourceHandler @Inject() (
     }
   }
 
-  private def createBookResource(p: BookData): BookResource = {
-    BookResource(p.id.toString, routerProvider.get.link(p.id), p.title, p.body)
+  private def createBookResource(book: BookData): BookResource = {
+    BookResource(
+      book.book_id.toString,
+      routerProvider.get.link(book.book_id),
+      book.title,
+      book.release_date
+    )
   }
 
 }
